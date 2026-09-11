@@ -1,0 +1,27 @@
+name: collect-selected-images-final
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  collect:
+    if: contains(github.event.comment.body, 'RUN_COLLECT_FINAL')
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests beautifulsoup4 pillow
+      - run: python collect_final.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: selected-image-artifact-final
+          path: selected_artifact
+          compression-level: 6
