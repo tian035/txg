@@ -1,0 +1,25 @@
+name: collect-cctv-airforce-stills
+on:
+  push:
+    paths:
+      - 'collect_cctv_airforce_stills.py'
+      - '.github/workflows/cctv-airforce-stills.yml'
+  workflow_dispatch:
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests beautifulsoup4 pillow
+      - run: python collect_cctv_airforce_stills.py
+      - run: zip -r cctv-airforce-stills.zip cctv_airforce_stills
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cctv-airforce-stills
+          path: cctv-airforce-stills.zip
+          retention-days: 7
