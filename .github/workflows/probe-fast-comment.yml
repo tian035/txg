@@ -1,0 +1,25 @@
+name: probe-official-images-fast
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    if: contains(github.event.comment.body, 'RUN_PROBE_FAST')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - run: python probe_fast.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: probe-fast-artifact
+          path: probe_fast_artifact
