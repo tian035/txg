@@ -1,0 +1,36 @@
+name: collect-markings-reference-images
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  collect:
+    if: contains(github.event.comment.body, 'run-markings-reference')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests pillow
+      - shell: bash
+        run: |
+          mkdir -p markings_reference
+          python - <<'PY'
+          import requests
+          from pathlib import Path
+          s=requests.Session(); s.headers['User-Agent']='Mozilla/5.0'
+          direct={'north_korean_mig15_1953.jpg':'https://media.defense.gov/2010/Jun/08/2000354501/-1/-1/0/100608-F-1234S-011.JPG'}
+          for name,url in direct.items():
+              r=s.get(url,timeout=120); r.raise_for_status(); Path('markings_reference',name).write_bytes(r.content)
+          api='https://commons.wikimedia.org/w/api.php'
+          title='File:MiG-15 - 079.jpg'
+          d=s.get(api,params={'action':'query','format':'json','prop':'imageinfo','iiprop':'url','titles':title},timeout=120).json()
+          page=next(iter(d['query']['pages'].values())); url=page['imageinfo'][0]['url']
+          r=s.get(url,timeout=240); r.raise_for_status(); Path('markings_reference/mig15_079_museum.jpg').write_bytes(r.content)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: markings-reference-images
+          path: markings_reference
