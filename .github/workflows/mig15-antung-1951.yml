@@ -1,0 +1,30 @@
+name: extract-mig15-antung-1951
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - extract_mig15_antung_1951.py
+      - .github/workflows/mig15-antung-1951.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests beautifulsoup4 pillow
+      - run: python extract_mig15_antung_1951.py
+      - run: zip -r mig15-antung-1951.zip mig15_antung_1951
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mig15-antung-1951
+          path: mig15-antung-1951.zip
+          retention-days: 7
