@@ -1,0 +1,28 @@
+name: extract-usaf-airfield-pages
+on:
+  push:
+    paths:
+      - 'extract_usaf_airfield_pages.py'
+      - '.github/workflows/usaf-airfield-pages.yml'
+  workflow_dispatch:
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install requests pillow pymupdf
+      - name: Download and extract official histories
+        run: python extract_usaf_airfield_pages.py
+      - name: Package
+        run: zip -r usaf-airfield-pages.zip usaf_airfield_pages
+      - uses: actions/upload-artifact@v4
+        with:
+          name: usaf-airfield-pages
+          path: usaf-airfield-pages.zip
+          retention-days: 7
