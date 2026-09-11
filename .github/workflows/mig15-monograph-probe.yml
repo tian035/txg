@@ -1,0 +1,30 @@
+name: probe-mig15-monograph-images
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - probe_mig15_all.py
+      - .github/workflows/mig15-monograph-probe.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests beautifulsoup4 pillow
+      - run: python probe_mig15_all.py
+      - run: zip -r mig15-monograph-probe.zip mig15_monograph_probe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mig15-monograph-probe
+          path: mig15-monograph-probe.zip
+          retention-days: 7
