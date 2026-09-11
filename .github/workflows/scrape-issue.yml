@@ -1,0 +1,30 @@
+name: scrape-on-issue
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests beautifulsoup4 pillow
+      - run: python scrape.py
+      - name: Commit collected files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scrape_artifact
+          git commit -m "Collect source images" || exit 0
+          git push
+      - uses: actions/upload-artifact@v4
+        with:
+          name: scrape-artifact
+          path: scrape_artifact
